@@ -1,0 +1,46 @@
+name: Auto-Grade
+
+on: [push]
+
+jobs:
+  grade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start services
+        run: docker-compose -f practice-02-events/docker-compose.yml up -d --build
+
+      - name: Wait for services
+        run: |
+          echo "Waiting for RabbitMQ..."
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:15672/api/overview -u guest:guest && break || sleep 2
+          done
+          echo "Waiting for Order Service..."
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3000/health && break || sleep 2
+          done
+          echo "Services ready."
+
+      - name: Install test dependencies
+        run: cd practice-02-events/test && npm install
+
+      - name: Run test suite
+        run: cd practice-02-events/test && npx jest --runInBand --forceExit --json --outputFile=results.json 2>&1 || true
+
+      - name: Generate grade report
+        run: node practice-02-events/grading/report.js practice-02-events/test/results.json
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: grade-report
+          path: grade-report.md
+
+      - name: Cleanup
+        if: always()
+        run: docker-compose -f practice-02-events/docker-compose.yml down -v
+

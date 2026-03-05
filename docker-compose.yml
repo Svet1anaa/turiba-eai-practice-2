@@ -1,0 +1,78 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: p2-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  order-service:
+    build: ./order-service
+    container_name: p2-order-service
+    ports:
+      - "3000:3000"
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      PORT: ${PORT:-3000}
+    volumes:
+      - ./shared:/app/shared:ro
+      - ./order-service/data:/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  payment-service:
+    build: ./payment-service
+    container_name: p2-payment-service
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      PAYMENT_FAIL_RATE: ${PAYMENT_FAIL_RATE:-20}
+      DLQ_EXCHANGE: ${DLQ_EXCHANGE:-orders.dlq.exchange}
+      MAX_RETRIES: ${MAX_RETRIES:-3}
+    volumes:
+      - ./shared:/app/shared:ro
+      - ./payment-service/data:/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  inventory-service:
+    build: ./inventory-service
+    container_name: p2-inventory-service
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      INVENTORY_FAIL_RATE: ${INVENTORY_FAIL_RATE:-10}
+      DLQ_EXCHANGE: ${DLQ_EXCHANGE:-orders.dlq.exchange}
+      MAX_RETRIES: ${MAX_RETRIES:-3}
+    volumes:
+      - ./shared:/app/shared:ro
+      - ./inventory-service/data:/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  notification-service:
+    build: ./notification-service
+    container_name: p2-notification-service
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      DLQ_EXCHANGE: ${DLQ_EXCHANGE:-orders.dlq.exchange}
+      MAX_RETRIES: ${MAX_RETRIES:-3}
+    volumes:
+      - ./shared:/app/shared:ro
+      - ./notification-service/data:/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+

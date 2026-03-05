@@ -1,0 +1,14 @@
+{
+  "name": "practice-02-events-tests",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "jest --runInBand --forceExit"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.4",
+    "axios": "^1.7.7",
+    "jest": "^29.7.0"
+  }
+}
+
