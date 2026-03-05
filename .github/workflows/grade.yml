@@ -29,10 +29,10 @@ jobs:
         run: cd practice-02-events/test && npm install
 
       - name: Run test suite
-        run: cd practice-02-events/test && npx jest --runInBand --forceExit --json --outputFile=results.json 2>&1 || true
+        run: cd test && npx jest --runInBand --forceExit --json --outputFile=results.json 2>&1 || true
 
       - name: Generate grade report
-        run: node practice-02-events/grading/report.js practice-02-events/test/results.json
+        run: node grading/report.js practice-02-events/test/results.json
 
       - name: Upload results
         uses: actions/upload-artifact@v4
