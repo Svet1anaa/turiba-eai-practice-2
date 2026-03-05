@@ -10,6 +10,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Enable docker-compose (compat)
+        run: |
+          sudo ln -sf /usr/bin/docker /usr/local/bin/docker-compose
+
       - name: Start services
         run: docker compose -f docker-compose.yml up -d --build
 
@@ -26,7 +30,7 @@ jobs:
           echo "Services ready."
 
       - name: Install test dependencies
-        run: cd test && npm install
+        run: cd test && npm ci
 
       - name: Run test suite
         run: |
