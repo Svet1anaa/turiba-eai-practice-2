@@ -26,7 +26,7 @@ jobs:
           echo "Services ready."
 
       - name: Install test dependencies
-        run: cd practice-02-events/test && npm install
+        run: cd test && npm install
 
       - name: Run test suite
         run: cd test && npx jest --runInBand --forceExit --json --outputFile=results.json 2>&1 || true
