@@ -30,15 +30,15 @@ jobs:
 
       - name: Run test suite
         run: |
-          echo "=== WHERE AM I ==="
+          echo " WHERE AM I "
           pwd
-          echo "=== LIST ROOT ==="
+          echo " LIST ROOT "
           ls -la
 
-          echo "=== LIST TEST FOLDER ==="
+          echo " LIST TEST FOLDER "
           ls -la test || true
 
-          echo "=== INSTALL & RUN JEST ==="
+          echo " INSTALL & RUN JEST "
           cd test
           pwd
           ls -la
