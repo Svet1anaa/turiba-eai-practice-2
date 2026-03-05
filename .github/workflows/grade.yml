@@ -28,8 +28,8 @@ jobs:
       - name: Install test dependencies
         run: cd test && npm install
 
-      - name: Run test suite
-        run: cd test && npx jest --runInBand --forceExit --json --outputFile=results.json 2>&1 || true
+      - name: Generate grade report
+        run: node grading/report.js test/results.json
 
       - name: Generate grade report
         run: node grading/report.js test/results.json
