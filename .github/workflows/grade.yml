@@ -12,7 +12,11 @@ jobs:
 
       - name: Enable docker-compose (compat)
         run: |
-          sudo ln -sf /usr/bin/docker /usr/local/bin/docker-compose
+          sudo tee /usr/local/bin/docker-compose > /dev/null <<'EOF'
+          #!/usr/bin/env bash
+          docker compose "$@"
+          EOF
+          sudo chmod +x /usr/local/bin/docker-compose
 
       - name: Start services
         run: docker compose -f docker-compose.yml up -d --build
