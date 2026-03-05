@@ -29,7 +29,26 @@ jobs:
         run: cd test && npm install
 
       - name: Run test suite
-        run: cd test && npx jest --runInBand --forceExit --json --outputFile=results.json 2>&1 || true
+        run: |
+          echo "=== WHERE AM I ==="
+          pwd
+          echo "=== LIST ROOT ==="
+          ls -la
+
+          echo "=== LIST TEST FOLDER ==="
+          ls -la test || true
+
+          echo "=== INSTALL & RUN JEST ==="
+          cd test
+          pwd
+          ls -la
+          npm install
+          npx jest --version
+          npx jest --runInBand --forceExit --json --outputFile=results.json
+
+          echo "=== AFTER JEST ==="
+          ls -la
+          test -f results.json
 
       - name: Generate grade report
         run: node grading/report.js test/results.json
